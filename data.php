@@ -1,8 +1,18 @@
 <?php
   include("connMysqlObj.php");
-  $sql_query = "SELECT * FROM students ORDER BY cID ASC";
-  $result = $db_link->query($sql_query);
-  $total_records = $result->num_rows;
+  
+  $pageRow_records = 3;
+  $num_pages = 1;
+  if (isset($_GET['page'])) {
+      $num_pages = $_GET['page'];
+  }
+  $startRow_records = ($num_pages -1) * $pageRow_records;
+  $sql_query = "SELECT * FROM students";
+  $sql_query_limit = $sql_query." LIMIT {$startRow_records}, {$pageRow_records}";
+  $result = $db_link->query($sql_query_limit);
+  $all_result = $db_link->query($sql_query);
+  $total_records = $all_result->num_rows;
+  $total_pages = ceil($total_records/$pageRow_records);
 ?>
 <html>
 
@@ -70,6 +80,31 @@
       echo "<tr>";
   }
 ?>
+  </table>
+  <table>
+    <tr>
+      <?php if ($num_pages > 1) { ?>
+      <td><a href="data.php?page=1">第一頁</a></td>
+      <td><a href="data.php?page=<?php echo $num_pages-1 ?>">上一頁</a>
+      </td>
+      <?php } ?>
+      <?php
+        for ($i=1;$i<=$total_pages;$i++) {
+            if ($i==$num_pages) {
+                echo "<td>$i</td>";
+            } else {
+                echo "<td><a href=\"data.php?page={$i}\">{$i}</a>
+            </td>";
+            }
+        }
+      ?>
+      <?php if ($num_pages < $total_pages) { ?>
+      <td><a href="data.php?page=<?php echo $num_pages+1 ?>">下一頁</a>
+      </td>
+      <td><a href="data.php?page=<?php echo $total_pages;?>">最後頁</a>
+      </td>
+      <?php } ?>
+    </tr>
   </table>
 </body>
 
